@@ -24,29 +24,23 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Router>
-          <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route
-              path="/*"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/wallets" element={<Wallets />} />
-                      <Route path="/transactions" element={<Transactions />} />
-                      <Route path="/transfers" element={<Transfers />} />
-                      <Route path="/loans" element={<Loans />} />
-                      <Route path="/categories" element={<Categories />} />
-                      <Route path="/reports" element={<Reports />} />
-                      <Route path="/settings" element={<Settings />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
+         <Routes>
+  <Route path="/auth" element={<Auth />} />
+
+  <Route element={<ProtectedRoute />}>
+    <Route element={<Layout />}>
+      <Route index element={<Index />} />
+      <Route path="wallets" element={<Wallets />} />
+      <Route path="transactions" element={<Transactions />} />
+      <Route path="transfers" element={<Transfers />} />
+      <Route path="loans" element={<Loans />} />
+      <Route path="categories" element={<Categories />} />
+      <Route path="reports" element={<Reports />} />
+      <Route path="settings" element={<Settings />} />
+      <Route path="*" element={<NotFound />} />
+    </Route>
+  </Route>
+</Routes>
           <Toaster />
         </Router>
       </AuthProvider>
