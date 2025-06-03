@@ -9,7 +9,8 @@ import {
   Calendar,
   Settings,
   CreditCard,
-  TrendingUp
+  TrendingUp,
+  PieChart
 } from "lucide-react";
 import {
   Sidebar,
@@ -30,6 +31,7 @@ const navigation = [
   { title: "Transfers", url: "/transfers", icon: CreditCard },
   { title: "Loans", url: "/loans", icon: TrendingUp },
   { title: "Reports", url: "/reports", icon: BarChart3 },
+  { title: "Category Reports", url: "/category-reports", icon: PieChart },
   { title: "Categories", url: "/categories", icon: Calendar },
   { title: "Settings", url: "/settings", icon: Settings },
 ];

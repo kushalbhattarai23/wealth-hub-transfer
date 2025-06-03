@@ -12,6 +12,7 @@ import Transfers from "@/pages/Transfers";
 import Loans from "@/pages/Loans";
 import Categories from "@/pages/Categories";
 import Reports from "@/pages/Reports";
+import CategoryReports from "@/pages/CategoryReports";
 import Settings from "@/pages/Settings";
 import Auth from "@/pages/Auth";
 import NotFound from "@/pages/NotFound";
@@ -35,6 +36,7 @@ function App() {
                 <Route path="loans" element={<Loans />} />
                 <Route path="categories" element={<Categories />} />
                 <Route path="reports" element={<Reports />} />
+                <Route path="category-reports" element={<CategoryReports />} />
                 <Route path="settings" element={<Settings />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
