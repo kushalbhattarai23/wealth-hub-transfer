@@ -22,14 +22,17 @@ export function TransactionForm({ open, onOpenChange, onSuccess, transaction }: 
   const [amount, setAmount] = useState(transaction?.amount || '');
   const [type, setType] = useState(transaction?.type || 'expense');
   const [walletId, setWalletId] = useState(transaction?.wallet_id || '');
+  const [categoryId, setCategoryId] = useState(transaction?.category_id || '');
   const [date, setDate] = useState(transaction?.date || new Date().toISOString().split('T')[0]);
   const [wallets, setWallets] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
     if (user) {
       loadWallets();
+      loadCategories();
     }
   }, [user]);
 
@@ -44,6 +47,17 @@ export function TransactionForm({ open, onOpenChange, onSuccess, transaction }: 
     }
   };
 
+  const loadCategories = async () => {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .eq('user_id', user?.id);
+    
+    if (!error && data) {
+      setCategories(data);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -54,6 +68,7 @@ export function TransactionForm({ open, onOpenChange, onSuccess, transaction }: 
         reason,
         type,
         wallet_id: walletId,
+        category_id: categoryId || null,
         date,
         user_id: user.id,
         income: type === 'income' ? parseFloat(amount) : null,
@@ -81,6 +96,7 @@ export function TransactionForm({ open, onOpenChange, onSuccess, transaction }: 
       setAmount('');
       setType('expense');
       setWalletId('');
+      setCategoryId('');
       setDate(new Date().toISOString().split('T')[0]);
     } catch (error: any) {
       toast.error(error.message);
@@ -141,6 +157,27 @@ export function TransactionForm({ open, onOpenChange, onSuccess, transaction }: 
                 {wallets.map((wallet) => (
                   <SelectItem key={wallet.id} value={wallet.id}>
                     {wallet.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="category">Transaction Type (Category)</Label>
+            <Select value={categoryId} onValueChange={setCategoryId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a category (optional)" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    <div className="flex items-center space-x-2">
+                      <div 
+                        className="w-3 h-3 rounded-full" 
+                        style={{ backgroundColor: category.color }}
+                      />
+                      <span>{category.name}</span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>

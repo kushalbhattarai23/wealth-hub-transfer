@@ -27,7 +27,8 @@ export default function Transactions() {
       .from('transactions')
       .select(`
         *,
-        wallets (name)
+        wallets (name),
+        categories (name, color)
       `)
       .eq('user_id', user?.id)
       .order('date', { ascending: false });
@@ -112,6 +113,7 @@ export default function Transactions() {
                   <th className="text-left py-3 px-4 font-medium text-gray-700">Date</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-700">Wallet</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-700">Type</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-700">Category</th>
                   <th className="text-right py-3 px-4 font-medium text-gray-700">Amount</th>
                   <th className="text-right py-3 px-4 font-medium text-gray-700">Actions</th>
                 </tr>
@@ -139,6 +141,19 @@ export default function Transactions() {
                       }`}>
                         {transaction.type}
                       </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      {transaction.categories ? (
+                        <div className="flex items-center space-x-2">
+                          <div 
+                            className="w-3 h-3 rounded-full" 
+                            style={{ backgroundColor: transaction.categories.color }}
+                          />
+                          <span className="text-sm text-gray-600">{transaction.categories.name}</span>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-gray-400">No category</span>
+                      )}
                     </td>
                     <td className={`py-3 px-4 text-right font-semibold ${
                       transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
