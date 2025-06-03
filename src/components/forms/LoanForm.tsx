@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,15 +18,36 @@ interface LoanFormProps {
 }
 
 export function LoanForm({ open, onOpenChange, onSuccess, loan }: LoanFormProps) {
-  const [name, setName] = useState(loan?.name || '');
-  const [type, setType] = useState(loan?.type || 'borrowed');
-  const [amount, setAmount] = useState(loan?.amount || '');
-  const [remainingAmount, setRemainingAmount] = useState(loan?.remaining_amount || '');
-  const [dueDate, setDueDate] = useState(loan?.due_date || '');
-  const [status, setStatus] = useState(loan?.status || 'active');
-  const [description, setDescription] = useState(loan?.description || '');
+  const [name, setName] = useState('');
+  const [type, setType] = useState('borrowed');
+  const [amount, setAmount] = useState('');
+  const [remainingAmount, setRemainingAmount] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [status, setStatus] = useState('active');
+  const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
+
+  // Initialize form with existing data when loan changes
+  useEffect(() => {
+    if (loan) {
+      setName(loan.name || '');
+      setType(loan.type || 'borrowed');
+      setAmount(loan.amount?.toString() || '');
+      setRemainingAmount(loan.remaining_amount?.toString() || '');
+      setDueDate(loan.due_date || '');
+      setStatus(loan.status || 'active');
+      setDescription(loan.description || '');
+    } else {
+      setName('');
+      setType('borrowed');
+      setAmount('');
+      setRemainingAmount('');
+      setDueDate('');
+      setStatus('active');
+      setDescription('');
+    }
+  }, [loan]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,11 +17,24 @@ interface WalletFormProps {
 }
 
 export function WalletForm({ open, onOpenChange, onSuccess, wallet }: WalletFormProps) {
-  const [name, setName] = useState(wallet?.name || '');
-  const [balance, setBalance] = useState(wallet?.balance || '');
-  const [currency, setCurrency] = useState(wallet?.currency || 'NPR');
+  const [name, setName] = useState('');
+  const [balance, setBalance] = useState('');
+  const [currency, setCurrency] = useState('NPR');
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
+
+  // Initialize form with existing data when wallet changes
+  useEffect(() => {
+    if (wallet) {
+      setName(wallet.name || '');
+      setBalance(wallet.balance?.toString() || '');
+      setCurrency(wallet.currency || 'NPR');
+    } else {
+      setName('');
+      setBalance('');
+      setCurrency('NPR');
+    }
+  }, [wallet]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

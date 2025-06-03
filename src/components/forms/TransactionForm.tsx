@@ -18,12 +18,12 @@ interface TransactionFormProps {
 }
 
 export function TransactionForm({ open, onOpenChange, onSuccess, transaction }: TransactionFormProps) {
-  const [reason, setReason] = useState(transaction?.reason || '');
-  const [amount, setAmount] = useState(transaction?.amount || '');
-  const [type, setType] = useState(transaction?.type || 'expense');
-  const [walletId, setWalletId] = useState(transaction?.wallet_id || '');
-  const [categoryId, setCategoryId] = useState(transaction?.category_id || '');
-  const [date, setDate] = useState(transaction?.date || new Date().toISOString().split('T')[0]);
+  const [reason, setReason] = useState('');
+  const [amount, setAmount] = useState('');
+  const [type, setType] = useState('expense');
+  const [walletId, setWalletId] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [wallets, setWallets] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -35,6 +35,25 @@ export function TransactionForm({ open, onOpenChange, onSuccess, transaction }: 
       loadCategories();
     }
   }, [user]);
+
+  // Initialize form with existing data when transaction changes
+  useEffect(() => {
+    if (transaction) {
+      setReason(transaction.reason || '');
+      setAmount(transaction.amount?.toString() || '');
+      setType(transaction.type || 'expense');
+      setWalletId(transaction.wallet_id || '');
+      setCategoryId(transaction.category_id || '');
+      setDate(transaction.date || new Date().toISOString().split('T')[0]);
+    } else {
+      setReason('');
+      setAmount('');
+      setType('expense');
+      setWalletId('');
+      setCategoryId('');
+      setDate(new Date().toISOString().split('T')[0]);
+    }
+  }, [transaction]);
 
   const loadWallets = async () => {
     const { data, error } = await supabase

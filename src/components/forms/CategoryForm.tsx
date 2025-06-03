@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,10 +16,21 @@ interface CategoryFormProps {
 }
 
 export function CategoryForm({ open, onOpenChange, onSuccess, category }: CategoryFormProps) {
-  const [name, setName] = useState(category?.name || '');
-  const [color, setColor] = useState(category?.color || '#3B82F6');
+  const [name, setName] = useState('');
+  const [color, setColor] = useState('#3B82F6');
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
+
+  // Initialize form with existing data when category changes
+  useEffect(() => {
+    if (category) {
+      setName(category.name || '');
+      setColor(category.color || '#3B82F6');
+    } else {
+      setName('');
+      setColor('#3B82F6');
+    }
+  }, [category]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
