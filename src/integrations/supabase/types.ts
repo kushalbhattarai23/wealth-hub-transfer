@@ -162,6 +162,7 @@ export type Database = {
           id: string
           is_public: boolean
           poster_url: string | null
+          slug: string | null
           title: string
           updated_at: string
         }
@@ -171,6 +172,7 @@ export type Database = {
           id?: string
           is_public?: boolean
           poster_url?: string | null
+          slug?: string | null
           title: string
           updated_at?: string
         }
@@ -180,6 +182,7 @@ export type Database = {
           id?: string
           is_public?: boolean
           poster_url?: string | null
+          slug?: string | null
           title?: string
           updated_at?: string
         }
@@ -291,6 +294,7 @@ export type Database = {
           id: string
           is_public: boolean
           name: string
+          slug: string | null
           updated_at: string
         }
         Insert: {
@@ -300,6 +304,7 @@ export type Database = {
           id?: string
           is_public?: boolean
           name: string
+          slug?: string | null
           updated_at?: string
         }
         Update: {
@@ -309,6 +314,7 @@ export type Database = {
           id?: string
           is_public?: boolean
           name?: string
+          slug?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -412,7 +418,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_slug: {
+        Args: { title: string }
+        Returns: string
+      }
     }
     Enums: {
       episode_status: "watched" | "not_watched"

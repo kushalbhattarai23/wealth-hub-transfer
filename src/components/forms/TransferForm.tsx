@@ -34,6 +34,17 @@ export function TransferForm({ open, onOpenChange, onSuccess, transfer }: Transf
     }
   }, [user]);
 
+  useEffect(() => {
+    if (transfer) {
+      setAmount(transfer.amount);
+      setFromWalletId(transfer.from_wallet_id);
+      setToWalletId(transfer.to_wallet_id);
+      setDescription(transfer.description || '');
+      setDate(transfer.date);
+      setStatus(transfer.status);
+    }
+  }, [transfer]);
+
   const loadWallets = async () => {
     const { data, error } = await supabase
       .from('wallets')
@@ -45,6 +56,43 @@ export function TransferForm({ open, onOpenChange, onSuccess, transfer }: Transf
     }
   };
 
+  const updateWalletBalances = async (fromWalletId: string, toWalletId: string, amount: number, isReversal = false) => {
+    const multiplier = isReversal ? -1 : 1;
+    
+    // Get current balances
+    const { data: fromWallet } = await supabase
+      .from('wallets')
+      .select('balance')
+      .eq('id', fromWalletId)
+      .single();
+    
+    const { data: toWallet } = await supabase
+      .from('wallets')
+      .select('balance')
+      .eq('id', toWalletId)
+      .single();
+
+    if (!fromWallet || !toWallet) {
+      throw new Error('Could not fetch wallet balances');
+    }
+
+    // Update from wallet (decrease balance)
+    const { error: fromError } = await supabase
+      .from('wallets')
+      .update({ balance: fromWallet.balance - (amount * multiplier) })
+      .eq('id', fromWalletId);
+
+    if (fromError) throw fromError;
+
+    // Update to wallet (increase balance)
+    const { error: toError } = await supabase
+      .from('wallets')
+      .update({ balance: toWallet.balance + (amount * multiplier) })
+      .eq('id', toWalletId);
+
+    if (toError) throw toError;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -54,10 +102,16 @@ export function TransferForm({ open, onOpenChange, onSuccess, transfer }: Transf
       return;
     }
 
+    const transferAmount = parseFloat(amount);
+    if (transferAmount <= 0) {
+      toast.error('Transfer amount must be greater than 0');
+      return;
+    }
+
     setLoading(true);
     try {
       const transferData = {
-        amount: parseFloat(amount),
+        amount: transferAmount,
         from_wallet_id: fromWalletId,
         to_wallet_id: toWalletId,
         description,
@@ -67,17 +121,36 @@ export function TransferForm({ open, onOpenChange, onSuccess, transfer }: Transf
       };
 
       if (transfer) {
+        // For updates, first reverse the old transfer effect on wallet balances
+        if (transfer.status === 'completed') {
+          await updateWalletBalances(transfer.from_wallet_id, transfer.to_wallet_id, transfer.amount, true);
+        }
+
         const { error } = await supabase
           .from('transfers')
           .update(transferData)
           .eq('id', transfer.id);
+        
         if (error) throw error;
+
+        // Apply new transfer effect on wallet balances if status is completed
+        if (status === 'completed') {
+          await updateWalletBalances(fromWalletId, toWalletId, transferAmount);
+        }
+
         toast.success('Transfer updated successfully!');
       } else {
         const { error } = await supabase
           .from('transfers')
           .insert([transferData]);
+        
         if (error) throw error;
+
+        // Update wallet balances only if status is completed
+        if (status === 'completed') {
+          await updateWalletBalances(fromWalletId, toWalletId, transferAmount);
+        }
+
         toast.success('Transfer created successfully!');
       }
 
@@ -90,7 +163,8 @@ export function TransferForm({ open, onOpenChange, onSuccess, transfer }: Transf
       setDate(new Date().toISOString().split('T')[0]);
       setStatus('completed');
     } catch (error: any) {
-      toast.error(error.message);
+      console.error('Transfer error:', error);
+      toast.error(error.message || 'Error processing transfer');
     }
     setLoading(false);
   };
@@ -124,7 +198,7 @@ export function TransferForm({ open, onOpenChange, onSuccess, transfer }: Transf
                 <SelectContent>
                   {wallets.map((wallet) => (
                     <SelectItem key={wallet.id} value={wallet.id}>
-                      {wallet.name}
+                      {wallet.name} (Balance: {wallet.currency} {wallet.balance.toLocaleString()})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -139,7 +213,7 @@ export function TransferForm({ open, onOpenChange, onSuccess, transfer }: Transf
                 <SelectContent>
                   {wallets.map((wallet) => (
                     <SelectItem key={wallet.id} value={wallet.id}>
-                      {wallet.name}
+                      {wallet.name} (Balance: {wallet.currency} {wallet.balance.toLocaleString()})
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -26,8 +26,8 @@ export default function Transfers() {
       .from('transfers')
       .select(`
         *,
-        from_wallet:wallets!transfers_from_wallet_id_fkey (name),
-        to_wallet:wallets!transfers_to_wallet_id_fkey (name)
+        from_wallet:wallets!transfers_from_wallet_id_fkey (name, currency),
+        to_wallet:wallets!transfers_to_wallet_id_fkey (name, currency)
       `)
       .eq('user_id', user?.id)
       .order('date', { ascending: false });
@@ -40,18 +40,65 @@ export default function Transfers() {
     setLoading(false);
   };
 
+  const reverseTransferBalances = async (transfer: any) => {
+    if (transfer.status !== 'completed') return;
+
+    // Get current balances
+    const { data: fromWallet } = await supabase
+      .from('wallets')
+      .select('balance')
+      .eq('id', transfer.from_wallet_id)
+      .single();
+    
+    const { data: toWallet } = await supabase
+      .from('wallets')
+      .select('balance')
+      .eq('id', transfer.to_wallet_id)
+      .single();
+
+    if (!fromWallet || !toWallet) {
+      throw new Error('Could not fetch wallet balances');
+    }
+
+    // Reverse the transfer: add back to from_wallet, subtract from to_wallet
+    const { error: fromError } = await supabase
+      .from('wallets')
+      .update({ balance: fromWallet.balance + transfer.amount })
+      .eq('id', transfer.from_wallet_id);
+
+    if (fromError) throw fromError;
+
+    const { error: toError } = await supabase
+      .from('wallets')
+      .update({ balance: toWallet.balance - transfer.amount })
+      .eq('id', transfer.to_wallet_id);
+
+    if (toError) throw toError;
+  };
+
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this transfer?')) {
-      const { error } = await supabase
-        .from('transfers')
-        .delete()
-        .eq('id', id);
-      
-      if (error) {
-        toast.error('Error deleting transfer');
-      } else {
+      try {
+        // Find the transfer to reverse its balance effects
+        const transferToDelete = transfers.find(t => t.id === id);
+        
+        if (transferToDelete) {
+          // Reverse wallet balances if the transfer was completed
+          await reverseTransferBalances(transferToDelete);
+        }
+
+        const { error } = await supabase
+          .from('transfers')
+          .delete()
+          .eq('id', id);
+        
+        if (error) throw error;
+        
         toast.success('Transfer deleted successfully');
         loadTransfers();
+      } catch (error: any) {
+        console.error('Delete transfer error:', error);
+        toast.error('Error deleting transfer');
       }
     }
   };
@@ -104,7 +151,9 @@ export default function Transfers() {
                     </div>
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">NPR {transfer.amount.toLocaleString()}</p>
+                    <p className="font-semibold text-gray-900">
+                      {transfer.from_wallet?.currency || 'NPR'} {transfer.amount.toLocaleString()}
+                    </p>
                     <p className="text-sm text-gray-500">{new Date(transfer.date).toLocaleDateString()}</p>
                   </div>
                 </div>
