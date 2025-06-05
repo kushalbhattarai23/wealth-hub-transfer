@@ -5,6 +5,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Layout } from "@/components/Layout";
 import { Toaster } from "@/components/ui/sonner";
+import { ShowVerseTrackerRouter } from "@/components/ShowVerseTrackerRouter";
 import Index from "@/pages/Index";
 import Wallets from "@/pages/Wallets";
 import Transactions from "@/pages/Transactions";
@@ -16,7 +17,6 @@ import CategoryReports from "@/pages/CategoryReports";
 import Settings from "@/pages/Settings";
 import Auth from "@/pages/Auth";
 import ProjectSelection from "@/pages/ProjectSelection";
-import ShowVerseTracker from "@/pages/ShowVerseTracker";
 import NotFound from "@/pages/NotFound";
 import "./App.css";
 
@@ -31,7 +31,7 @@ function App() {
             <Route path="/auth" element={<Auth />} />
             <Route element={<ProtectedRoute />}>
               <Route path="/project-selection" element={<ProjectSelection />} />
-              <Route path="/show-verse-tracker" element={<ShowVerseTracker />} />
+              <Route path="/show-verse-tracker/*" element={<ShowVerseTrackerRouter />} />
               <Route element={<Layout />}>
                 <Route index element={<Index />} />
                 <Route path="wallets" element={<Wallets />} />

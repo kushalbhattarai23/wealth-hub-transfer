@@ -36,7 +36,7 @@ export const ProtectedRoute = () => {
   }
 
   // Allow access to project selection and show-verse-tracker without project selection check
-  if (location.pathname === '/project-selection' || location.pathname === '/show-verse-tracker') {
+  if (location.pathname === '/project-selection' || location.pathname.startsWith('/show-verse-tracker')) {
     return <Outlet />;
   }
 
