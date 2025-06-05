@@ -26,7 +26,7 @@ export default function Auth() {
     if (error) {
       setError(error.message);
     } else {
-      navigate('/');
+      navigate('/project-selection');
     }
     setLoading(false);
   };

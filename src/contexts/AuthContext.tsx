@@ -34,6 +34,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Redirect to project selection after successful sign in
+        if (event === 'SIGNED_IN' && session?.user) {
+          // Check if user has already selected a project
+          const selectedProject = localStorage.getItem('selectedProject');
+          if (!selectedProject) {
+            // Only redirect if we're not already on the project selection page
+            if (window.location.pathname !== '/project-selection') {
+              window.location.href = '/project-selection';
+            }
+          }
+        }
       }
     );
 
@@ -69,6 +81,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
+    // Clear project selection when signing out
+    localStorage.removeItem('selectedProject');
     await supabase.auth.signOut();
     window.location.href = '/auth';
   };

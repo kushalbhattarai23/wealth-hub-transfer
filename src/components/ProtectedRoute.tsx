@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -5,6 +6,17 @@ import { useAuth } from '@/contexts/AuthContext';
 export const ProtectedRoute = () => {
   const { user, loading } = useAuth();
   const location = useLocation();
+
+  useEffect(() => {
+    // If user is authenticated and on the root path, check project selection
+    if (user && location.pathname === '/') {
+      const selectedProject = localStorage.getItem('selectedProject');
+      if (!selectedProject) {
+        // Redirect to project selection if no project is selected
+        window.location.href = '/project-selection';
+      }
+    }
+  }, [user, location.pathname]);
 
   if (loading) {
     return (
@@ -21,6 +33,17 @@ export const ProtectedRoute = () => {
 
   if (!user) {
     return <Navigate to="/auth" state={{ from: location }} replace />;
+  }
+
+  // Allow access to project selection and show-verse-tracker without project selection check
+  if (location.pathname === '/project-selection' || location.pathname === '/show-verse-tracker') {
+    return <Outlet />;
+  }
+
+  // For FinTrackr routes, check if project is selected
+  const selectedProject = localStorage.getItem('selectedProject');
+  if (!selectedProject && location.pathname !== '/project-selection') {
+    return <Navigate to="/project-selection" replace />;
   }
 
   return <Outlet />;

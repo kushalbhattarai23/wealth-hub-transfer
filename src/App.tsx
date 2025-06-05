@@ -15,6 +15,8 @@ import Reports from "@/pages/Reports";
 import CategoryReports from "@/pages/CategoryReports";
 import Settings from "@/pages/Settings";
 import Auth from "@/pages/Auth";
+import ProjectSelection from "@/pages/ProjectSelection";
+import ShowVerseTracker from "@/pages/ShowVerseTracker";
 import NotFound from "@/pages/NotFound";
 import "./App.css";
 
@@ -28,6 +30,8 @@ function App() {
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route element={<ProtectedRoute />}>
+              <Route path="/project-selection" element={<ProjectSelection />} />
+              <Route path="/show-verse-tracker" element={<ShowVerseTracker />} />
               <Route element={<Layout />}>
                 <Route index element={<Index />} />
                 <Route path="wallets" element={<Wallets />} />
