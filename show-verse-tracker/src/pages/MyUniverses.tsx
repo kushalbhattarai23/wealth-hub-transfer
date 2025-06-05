@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/components/auth/AuthProvider';
-import { UniverseCard } from '@/components/universes/UniverseCard';
-import { CreateUniverseForm } from '@/components/forms/CreateUniverseForm';
+import { useAuth } from '../components/auth/AuthProvider';
+import { UniverseCard } from '../components/universes/UniverseCard';
+import { CreateUniverseForm } from '../components/forms/CreateUniverseForm';
 import { Button } from '@/components/ui/button';
 import { Plus, Trash2, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';

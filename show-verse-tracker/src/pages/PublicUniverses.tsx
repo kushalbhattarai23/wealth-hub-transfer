@@ -1,10 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { UniverseCard } from '@/components/universes/UniverseCard';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { UniverseCard } from '../components/universes/UniverseCard';
+import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../components/auth/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/components/auth/AuthProvider';
 
 interface Universe {
   id: string;
@@ -12,7 +14,8 @@ interface Universe {
   description: string | null;
   slug: string;
   created_at: string;
-  creator_id: string;
+  is_public: boolean;
+  creator_id: string | null;
 }
 
 export const PublicUniverses: React.FC = () => {
@@ -23,10 +26,10 @@ export const PublicUniverses: React.FC = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchPublicUniverses();
-  }, [user]);
+    fetchUniverses();
+  }, []);
 
-  const fetchPublicUniverses = async () => {
+  const fetchUniverses = async () => {
     try {
       const { data, error } = await supabase
         .from('universes')
@@ -38,72 +41,44 @@ export const PublicUniverses: React.FC = () => {
       setUniverses(data || []);
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: 'Failed to load public universes',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to load universes",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePublicUniverseSelect = (universeId: string) => {
+  const handleUniverseSelect = (universeId: string) => {
     const universe = universes.find(u => u.id === universeId);
     if (universe?.slug) {
-      navigate(`/universe/${universe.slug}`);
+      navigate(`/show-verse-tracker/universe/${universe.slug}`);
     }
   };
-
-  if (!user) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-gray-600">Please sign in to view public universes.</p>
-      </div>
-    );
-  }
 
   if (loading) {
     return <div className="text-center py-8">Loading universes...</div>;
   }
 
-  const myUniverses = universes.filter((u) => u.creator_id === user.id);
-  const otherUniverses = universes.filter((u) => u.creator_id !== user.id);
-
   return (
-    <div className="space-y-10">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">My Public Universes</h1>
-        <p className="text-gray-600">Your public TV show universes</p>
-
-        {myUniverses.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
-            {myUniverses.map((universe) => (
-              <UniverseCard key={universe.id} universe={universe} onSelect={handlePublicUniverseSelect} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8 text-gray-500">
-            You haven't created any public universes yet.
-          </div>
-        )}
+        <h1 className="text-3xl font-bold">Public Universes</h1>
+        <p className="text-gray-600">Explore different entertainment universes</p>
       </div>
 
-      <div>
-        <h2 className="text-2xl font-bold">Other Public Universes</h2>
-        <p className="text-gray-600">Explore universes created by other users</p>
-
-        {otherUniverses.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
-            {otherUniverses.map((universe) => (
-              <UniverseCard key={universe.id} universe={universe} onSelect={handlePublicUniverseSelect} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8 text-gray-500">
-            No public universes from other users found.
-          </div>
-        )}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {universes.map((universe) => (
+          <UniverseCard key={universe.id} universe={universe} onSelect={handleUniverseSelect} />
+        ))}
       </div>
+
+      {universes.length === 0 && (
+        <div className="text-center py-8 text-gray-500">
+          <p>No public universes available yet.</p>
+        </div>
+      )}
     </div>
   );
 };
