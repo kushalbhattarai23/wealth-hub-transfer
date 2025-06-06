@@ -61,7 +61,7 @@ export const MyUniverses: React.FC = () => {
   const handleMyUniverseSelect = (universeId: string) => {
     const universe = universes.find(u => u.id === universeId);
     if (universe?.slug) {
-      navigate(`/universe/${universe.slug}`);
+      navigate(`show-verse-tracker/universe/${universe.slug}`);
     }
   };
 
