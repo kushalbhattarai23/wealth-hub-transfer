@@ -25,6 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 const navigation = [
+  { title: "Projects", url: "/project-selection", icon: Home },
   { title: "Dashboard", url: "/", icon: Home },
   { title: "Wallets", url: "/wallets", icon: Wallet },
   { title: "Transactions", url: "/transactions", icon: ArrowLeftRight },
